@@ -8,8 +8,8 @@ class KMaker:
         self.ic_table = frequency.getIcTable()
 
     def getKeySize(self):
-        getNearFrequency = lambda k : abs(float('%.3f' % k[1]) - self.lang_ic)
-        key,_ = min(self.ic_table.items(), key = getNearFrequency)
+        nearest_frequency = lambda k : abs(float('%.3f' % k[1]) - self.lang_ic)
+        key,_ = min(self.ic_table.items(), key = nearest_frequency)
         return key
 
     def getKey(self):

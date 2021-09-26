@@ -14,7 +14,7 @@ class FSniffer:
 
     def buildIcTable(self):  
 
-        # (OK) Armazena possíveis tamanhos de chave com médias de índices de coincidência
+        # stores possible key sizes w/ average ics
         for key_size in range(self.alpha_size):
             for k in range(key_size):
                 
@@ -22,29 +22,28 @@ class FSniffer:
 
                 if len(cipher_chunk) >= self.min_chunk_len:
                     ic = self.calcIc(cipher_chunk)
-                    # apenas ICs não-zero
+                    # only for non-zero ics
                     if ic > 0.0:
                         if key_size in self.ic_table:
                             self.ic_table[key_size].append(ic)
                         else:
                             self.ic_table[key_size] = [ic]
-            # Calcula a média de índices para cada tamanho de chaves
+            # average ics for each size
             if key_size in self.ic_table:
                 self.ic_table[key_size] = float(sum(self.ic_table[key_size]) / len(self.ic_table[key_size]))
 
-    # Calcula o índice de coincidência
     def calcIc(self, cipher_chunk):
         calculate_frequency = collections.Counter(cipher_chunk)
 
         frequency_sum = 0.0
-        # Calcula o somatório das frequências 
         for char_frequency in calculate_frequency.values():
             frequency_sum = frequency_sum + char_frequency * (char_frequency - 1)
 
         text_size = len(cipher_chunk)
         return frequency_sum / (text_size * (text_size - 1))
 
-    # Realiza uma distribuição e guarda a soma das distribuições, para que assim seja possível descobrir quem é o melhor candidato
+    # runs distribution and keeps dists sum 
+    # useful for finding the best candidate
     def getFrequencySum(self, frequencies, total_length):
         sum = 0.0
         for f in frequencies:
@@ -52,7 +51,7 @@ class FSniffer:
             sum += ((frequencies[f] - math.pow(self.alpha[f], 2)) / self.alpha[f])
         return sum
 
-    # Realiza o deslocamento dos caracteres para decifrar o texto 
+    # fluctuates characters to unveil text 
     def getLetterFluctuations(self, cipher_chunk, position):
         fluctuations = []
         for letter in cipher_chunk:
@@ -60,7 +59,7 @@ class FSniffer:
             fluctuations.append(fluc)
         return fluctuations
 
-    # De acordo com o cálculo da distribuição, escolhe a letra cuja frequência mais se aproxima do índice da língua portuguesa
+    # dist follow-up: picks nearest letter to lang ic by frequency
     def getProbableLetter(self, cipher_chunk):
         sums = {}
         
