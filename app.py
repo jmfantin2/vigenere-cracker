@@ -1,5 +1,9 @@
 from utils import msg, settings
 
+msg.mkLine()
+msg.greet()
+msg.mkLine()
+
 """
 INICIA AS VARIÁVEIS
 """
@@ -30,4 +34,5 @@ def textChunks(text, key_size):
 
 ###################
 
+msg.loading()
 textChunks(cipher, 2)
