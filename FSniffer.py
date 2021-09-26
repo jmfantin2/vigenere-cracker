@@ -45,10 +45,10 @@ class FSniffer:
         return frequency_sum / (text_size * (text_size - 1))
 
     # Realiza uma distribuição e guarda a soma das distribuições, para que assim seja possível descobrir quem é o melhor candidato
-    def getFrequencySum(self, frequencies, totalLength):
+    def getFrequencySum(self, frequencies, total_length):
         sum = 0.0
         for f in frequencies:
-            frequencies[f] *= (1.0 / totalLength)
+            frequencies[f] *= (1.0 / total_length)
             sum += ((frequencies[f] - math.pow(self.alpha[f], 2)) / self.alpha[f])
         return sum
 
