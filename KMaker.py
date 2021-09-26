@@ -1,23 +1,23 @@
 import string
 
 class KMaker:
-    def __init__(self, frequency, alpha, lang_coindex):
+    def __init__(self, frequency, alpha, lang_ic):
         self.frequency = frequency
         self.alpha_size = len(alpha)
-        self.lang_coindex = lang_coindex
-        self.matrix = frequency.GetMatrix()
+        self.lang_ic = lang_ic
+        self.ic_table = frequency.getIcTable()
 
-    def GetKeyLength(self):
-        getClosestFrequency = lambda k : abs(float('%.3f' % k[1]) - self.lang_coindex)
-        key,_ = min(self.matrix.items(), key = getClosestFrequency)
+    def getKeySize(self):
+        getNearFrequency = lambda k : abs(float('%.3f' % k[1]) - self.lang_ic)
+        key,_ = min(self.ic_table.items(), key = getNearFrequency)
         return key
 
-    def GetPassword(self):
-        keyLength = self.GetKeyLength()
-        encryptedText = self.frequency.GetEncryptedText()
-        return ''.join(self.frequency.GetBestLetterGuess(encryptedText[k::keyLength]) for k in range(keyLength))
+    def getKey(self):
+        key_size = self.getKeySize()
+        cipher = self.frequency.getCipher()
+        return ''.join(self.frequency.getProbableLetter(cipher[k::key_size]) for k in range(key_size))
 
-    def GetPlainText(self):
-        password = self.GetPassword()
-        encryptedText = self.frequency.GetEncryptedText()
-        return ''.join(string.ascii_lowercase[(ord(char) - ord(password[pos % len(password)])) % self.alpha_size] for pos, char in enumerate(encryptedText))
+    def revealOriginalText(self):
+        key = self.getKey()
+        cipher = self.frequency.getCipher()
+        return ''.join(string.ascii_lowercase[(ord(char) - ord(key[pos % len(key)])) % self.alpha_size] for pos, char in enumerate(cipher))

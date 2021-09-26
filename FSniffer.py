@@ -9,76 +9,72 @@ class FSniffer:
         self.alpha = alpha
         self.alpha_size = len(alpha)
         self.most_fr = most_fr
-        self.matrix = {}
-        self.__BuildTableOfIndexes()
+        self.ic_table = {}
+        self.buildIcTable()
 
-    def __BuildTableOfIndexes(self):  
+    def buildIcTable(self):  
 
         # (OK) Armazena possíveis tamanhos de chave com médias de índices de coincidência
-        for keySize in range(self.alpha_size):
-            for k in range(keySize):
+        for key_size in range(self.alpha_size):
+            for k in range(key_size):
+                
+                cipher_chunk = str(self.cipher_text[k::key_size])
 
-                # Cria substrings
-                encryptedChunk = str(self.cipher_text[k::keySize])
-
-                # Só considera cadeias de texto cujo tamanho é maior ou igual ao tamanho mínimo definido para o bloco
-                if len(encryptedChunk) >= self.min_chunk_len:
-                    coincidenceIndex = self.__CalculateIndexOfCoincidence(encryptedChunk)
-                    # Considera apenas índices diferentes de 0
-                    if coincidenceIndex > .0:
-                        if keySize in self.matrix:
-                            self.matrix[keySize].append(coincidenceIndex)
+                if len(cipher_chunk) >= self.min_chunk_len:
+                    ic = self.calcIc(cipher_chunk)
+                    # apenas ICs não-zero
+                    if ic > 0.0:
+                        if key_size in self.ic_table:
+                            self.ic_table[key_size].append(ic)
                         else:
-                            self.matrix[keySize] = [coincidenceIndex]
+                            self.ic_table[key_size] = [ic]
             # Calcula a média de índices para cada tamanho de chaves
-            if keySize in self.matrix:
-                self.matrix[keySize] = float(sum(self.matrix[keySize]) / len(self.matrix[keySize]))
+            if key_size in self.ic_table:
+                self.ic_table[key_size] = float(sum(self.ic_table[key_size]) / len(self.ic_table[key_size]))
 
     # Calcula o índice de coincidência
-    def __CalculateIndexOfCoincidence(self, encryptedChunk):
-        calculate_frequency = collections.Counter(encryptedChunk)
+    def calcIc(self, cipher_chunk):
+        calculate_frequency = collections.Counter(cipher_chunk)
 
         frequency_sum = 0.0
         # Calcula o somatório das frequências 
         for char_frequency in calculate_frequency.values():
             frequency_sum = frequency_sum + char_frequency * (char_frequency - 1)
 
-        text_size = len(encryptedChunk)
+        text_size = len(cipher_chunk)
         return frequency_sum / (text_size * (text_size - 1))
 
     # Realiza uma distribuição e guarda a soma das distribuições, para que assim seja possível descobrir quem é o melhor candidato
-    def _GetFrequencyTestSum(self, frequencies, totalLength):
-        totalSum = 0.0
+    def getFrequencySum(self, frequencies, totalLength):
+        sum = 0.0
         for f in frequencies:
             frequencies[f] *= (1.0 / totalLength)
-            totalSum += ((frequencies[f] - math.pow(self.alpha[f], 2)) / self.alpha[f])
-        return totalSum
+            sum += ((frequencies[f] - math.pow(self.alpha[f], 2)) / self.alpha[f])
+        return sum
 
     # Realiza o deslocamento dos caracteres para decifrar o texto 
-    def _GetLetterDisplacements(self, encryptedChunk, position):
-        displacements = []
-        alphabetSize = self.alpha_size
-        for letter in encryptedChunk:
-            displacement = chr(ord(self.most_fr) + ((ord(letter) - ord(self.most_fr) - position) % alphabetSize))
-            displacements.append(displacement)
-        return displacements
+    def getLetterFluctuations(self, cipher_chunk, position):
+        fluctuations = []
+        for letter in cipher_chunk:
+            fluc = chr(ord(self.most_fr) + ((ord(letter) - ord(self.most_fr) - position) % self.alpha_size))
+            fluctuations.append(fluc)
+        return fluctuations
 
-    # De acordo com o cálculo da distribuição, escolhe a letra cujo a frequência mais se aproxima do índice da língua portuguesa
-    def GetBestLetterGuess(self, encryptedChunk):
+    # De acordo com o cálculo da distribuição, escolhe a letra cuja frequência mais se aproxima do índice da língua portuguesa
+    def getProbableLetter(self, cipher_chunk):
         sums = {}
-        alphabetLength = self.alpha_size
         
-        for i in range(alphabetLength):
-            displacements = self._GetLetterDisplacements(encryptedChunk, i)
-            frequencies = collections.Counter(displacements)
-            sums[i] = self._GetFrequencyTestSum(frequencies, len(encryptedChunk))
-            letterReplaced = min(sums, key = sums.get) + ord(self.most_fr)
+        for i in range(self.alpha_size):
+            fluctuations = self.getLetterFluctuations(cipher_chunk, i)
+            frequencies = collections.Counter(fluctuations)
+            sums[i] = self.getFrequencySum(frequencies, len(cipher_chunk))
+            letter_shifted = min(sums, key = sums.get) + ord(self.most_fr)
             
-        return chr(letterReplaced)
+        return chr(letter_shifted)
     
-    def GetMatrix(self):
-        return self.matrix
+    def getIcTable(self):
+        return self.ic_table
 
-    def GetEncryptedText(self):
+    def getCipher(self):
         return self.cipher_text
 

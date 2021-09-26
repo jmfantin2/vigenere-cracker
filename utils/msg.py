@@ -7,6 +7,16 @@ quotes = ('I\'ve never found it hard to hack most people.\nIf you listen to them
 def greet():
   print(quotes[0])
 
+def loading(n):
+  if n == 0:
+    print('capturando cifra..')
+  elif n == 1:
+    print('analisando frequências..')
+  elif n == 2:
+    print('forjando chave..')
+  else:
+    print('furtando informações..')
+
 def goodbye():
   print(quotes[1])
 

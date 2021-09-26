@@ -4,10 +4,12 @@ from KMaker import KMaker
 
 from utils import msg
 
+# PARA ESCREVER O TEXTO ORIGINAL NA PASTA outputs, DESCOMENTE A LINHA 52
+
 ''' 
 Observações:
-  lang_coindex (PT) = 1.94/26 = 0.0746
-  lang_coindex (EN) = 1.73/26 = 0.0665
+  lang_ic (PT) = 1.94/26 = 0.0746
+  lang_ic (EN) = 1.73/26 = 0.0665
   > Retirado de https://en.wikipedia.org/wiki/Index_of_coincidence
   alpha { ... } 
   > Retirado com esforço de https://en.wikipedia.org/wiki/Letter_frequency
@@ -19,10 +21,10 @@ ALPHA = {'a':0.1463,'b':0.0104,'c':0.0388,'d':0.0499,'e':0.1257,'f':0.0102,'g':0
 MOST_FR = 'a' # pt 'a' || en 'e'
 LANG_COINDEX = 0.0746 # pt 0.0746 || en 0.0665
 
-INPUT = 'cipher4.txt'
+INPUT = 'cipher15.txt'
 PROJ_PATH = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 INPUT_PATH = PROJ_PATH + '\\utils\\inputs\\' + INPUT
-OUTPUT = 'crackd4.txt'
+OUTPUT = 'crackd15.txt'
 OUTPUT_PATH = PROJ_PATH + '\\utils\\outputs\\' + OUTPUT
 
 def readInput():  
@@ -35,13 +37,22 @@ def writeOutput(decipher_text):
 
 if __name__ == "__main__":
 
+  msg.mkLine()
+  msg.greet()
+  msg.mkLine()
+
+  msg.loading(0)
   cipher_text = readInput()
-
+  msg.loading(1)
   f_results = FSniffer(cipher_text, MIN_CHUNK_LEN, ALPHA, MOST_FR)
-  your_key = KMaker(f_results, ALPHA, LANG_COINDEX)
+  msg.loading(2)
+  keymaker = KMaker(f_results, ALPHA, LANG_COINDEX)
+  your_key = keymaker.getKey()
+  msg.loading(3)
+  # writeOutput(keymaker.revealOriginalText())
 
-  #print('Texto decifrado: \n' + your_key.GetPlainText())
-  print('Texto decifrado: nah you don\'t wanna.')
-  print('You\'ve been hacked:', your_key.GetPassword())
-  
-  writeOutput(your_key.GetPlainText())
+  print('\nCrakeamos sua chave (', your_key, ')\n2400R$ no PIX ( b4a375a3-be31-4d06-a628-27300d62335e ) ou REVELAREMOS seus segredos')
+  msg.mkLine()
+
+  msg.goodbye()
+  msg.mkLine()
