@@ -7,4 +7,4 @@ cd vigenere-cracker/
 py app.py
 ```
 
-feito com python 3.9.7
+feito com python 3.9.7 e pycrypto 2.6.1
